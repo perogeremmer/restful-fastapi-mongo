@@ -36,7 +36,11 @@ class TodoController:
     @staticmethod
     async def show(id) -> JSONResponse:
         try:
-            todo = Todos.objects.get(id=id)
+            todo = Todos.objects(id=id).first()
+
+            if todo is None:
+                raise Exception('todo tidak ditemukan!')
+
             todos = TodoTransformer.singleTransform(todo)
             return response.ok(todos, "")
         except Exception as e:
@@ -50,6 +54,10 @@ class TodoController:
             description = body['description']
 
             todo = Todos.objects(id=id).first()
+
+            if todo is None:
+                raise Exception('todo tidak ditemukan!')
+
             todo.title = title
             todo.description = description
             todo.save()
@@ -62,7 +70,11 @@ class TodoController:
     @staticmethod
     async def delete(id: str) -> JSONResponse:
         try:
-            todo = Todos.objects(id=id)
+            todo = Todos.objects(id=id).first()
+
+            if todo is None:
+                raise Exception('todo tidak ditemukan!')
+
             todo.delete()
             return response.ok('', "Berhasil menghapusTodo!")
         except Exception as e:

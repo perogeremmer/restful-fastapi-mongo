@@ -22,6 +22,9 @@ class UserController:
             body = await request.json()
             name = body['name']
 
+            if name == "":
+                raise Exception("name couldn't be empty!")
+
             user = Users(name=name)
             user.save()
             transformer = UserTransformer.singleTransform(user)
@@ -32,7 +35,11 @@ class UserController:
     @staticmethod
     async def show(id) -> JSONResponse:
         try:
-            user = Users.objects.get(id=id)
+            user = Users.objects(id=id).first()
+
+            if user is None:
+                raise Exception('user tidak ditemukan!')
+
             transformer = UserTransformer.singleTransform(user)
             return response.ok(transformer, "")
         except Exception as e:
@@ -44,7 +51,14 @@ class UserController:
             body = await request.json()
             name = body['name']
 
+            if name == "":
+                raise Exception("name couldn't be empty!")
+
             user = Users.objects(id=id).first()
+
+            if user is None:
+                raise Exception('user tidak ditemukan!')
+
             user.name = name
             user.save()
 
@@ -56,7 +70,12 @@ class UserController:
     @staticmethod
     async def delete(id: str) -> JSONResponse:
         try:
-            user = Users.objects(id=id)
+
+            user = Users.objects(id=id).first()
+
+            if user is None:
+                raise Exception('user tidak ditemukan!')
+
             user.delete()
             return response.ok('', "Berhasil Menghapus User!")
         except Exception as e:
