@@ -9,6 +9,9 @@ from starlette.testclient import TestClient
 from app import app
 from app.models.user import Users
 
+"""
+    Inisialisasi Test Client sehingga menjalankan FastAPI tanpa perlu dijalankan dengan uvicorn.
+"""
 client = TestClient(app)
 
 
@@ -16,11 +19,17 @@ class TestUser(TestCase):
 
     @classmethod
     def setUpClass(cls):
+        """
+            setUp function sama seperti __init__ dimana file test pertama kali djialankan.
+        """
         disconnect()
         connect('mongoenginetest', host='mongomock://localhost/mocking_db')
 
     @classmethod
     def tearDownClass(cls):
+        """
+            tearDown function akan dijalankan saat seluruh test selesai dijalankan.
+        """
         disconnect()
 
     def test_insert_user(self):
@@ -39,7 +48,7 @@ class TestUser(TestCase):
         response = client.post("/users", json={"name": name})
         assert response.status_code == 200
 
-        user = Users.objects.get(name=name)
+        user = Users.objects(name=name).first()
         assert user.name == name
 
     def test_insert_user_with_empty(self):
