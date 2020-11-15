@@ -3,6 +3,7 @@ from starlette.responses import JSONResponse
 
 from app import response
 from app.models.todo import Todos
+from app.tasks import CreateTodoLog
 from app.transformers import TodoTransformer
 
 
@@ -29,6 +30,17 @@ class TodoController:
             todo.save()
 
             todos = TodoTransformer.singleTransform(todo)
+
+            # Menyiapkan payload yang akan dikirim ke worker
+            payload = {
+                "todo_title": title,
+                "user_id": user_id,
+                "todo_id": str(todo.id)
+            }
+
+            # Menjalankan paylaod
+            CreateTodoLog.execute.delay(payload)
+
             return response.ok(todos, "Berhasil Membuat Todo!")
         except Exception as e:
             return response.badRequest('', f'{e}')
